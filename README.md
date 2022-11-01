@@ -1,0 +1,2 @@
+# SQL_STUDY
+Study DBMS for SQLD
