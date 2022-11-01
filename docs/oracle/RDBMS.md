@@ -20,6 +20,6 @@
     RDBMS는 DB에서 사용자가 요청한 데이터를 제공하거나 작업의 성공 여부를 리턴해준다. 
 
 ### SQL의 종류 
-- DDL
-- DCL
-- DML
+- [DDL](./DDL.md)
+- [DCL](./DCL.md)
+- [DML](./DML.md)
