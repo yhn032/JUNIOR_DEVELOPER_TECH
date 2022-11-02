@@ -18,8 +18,11 @@
 # SQL(Structured Query Language)
     RDB에서 데이터를 정의, 조작, 제어하기 위해 사용하는 언어로 사용자는 SQL문으로 하고자 하는 작업을 요청하고,
     RDBMS는 DB에서 사용자가 요청한 데이터를 제공하거나 작업의 성공 여부를 리턴해준다. 
+    ![image](https://user-images.githubusercontent.com/87313203/199501642-a601b847-6a19-4d38-adee-11e48b3ba0a9.png)
+
 
 ### SQL의 종류 
 - [DDL](./DDL.md)
 - [DCL](./DCL.md)
 - [DML](./DML.md)
+- [TCL](./TCL.md)
