@@ -41,7 +41,6 @@
 	WHERE 	컬럼=#{param1} AND	컬럼=#{param2}
 </select>
 ```
-<br>
 
 ### 2. 배열 파라미터 - String params(n)
   {'N'}으로 표현이 가능하지만, 의미하는 바를 알기 어려워 많이 사용하지 않음 
@@ -52,7 +51,7 @@
 	WHERE 	컬럼=#{0} AND 	컬럼=#{1}
 </select>
 ```
-<br>
+
 ### 3. @Param 애노테이션 사용 - @Param("TestParam")String testColumn
   코드가 비교적 길어지지만, 유지보수 측면에서 파라미터의 이름만으로도 어떤 의미를 가지고 
   있는지 분명하게 파악할 수 있어 자주 사용한다. 
@@ -63,8 +62,6 @@
 	WHERE 	컬럼=#{TestParam}
 </select>
 ```
-<br>
-  
 ### 4. 해시맵 파라미터 - Map<String, String> 또는 Vo - Web Data Object
   가장 많이 사용한다.
   공공데이터의 구조인 JSON 데이터와 궁합이 좋다. 
