@@ -78,3 +78,63 @@ NULL(ASCII 00) : 아직 정의되지 않는 미지의 값이너가, 현재 데�
 공백(ASCII 32)이나 숫자0 (ASCII 48)과 전혀 다른 값이고, 데이터가 없는 공집합과도 구분해야 한다.
 
 
+### 테이블 생성 및 제약조건 생성 실습 1. 부모 테이블
+```sql
+CREATE TABLE TEST.TB_SUBWAY_STATN_TMP	--지하철역 임시
+(
+	SUBWAY_STATN_NO	CHAR(6) NOT NULL,	--지하철역 번호
+	LN_NM	VARCHAR2(50) NOT NULL,	--노선명
+	STATN_NM	VARCHAR2(50) NOT NULL,	--역명
+	CONSTRAINT PK_TB_SUBWAY_STATN_TMP PRIMARY KEY(SUBWAY_STATN_NO)	--지하철역 번호 PK
+);
+```
+
+### 테이블 생성 및 제약조건 생성 실습 1. 자식 테이블
+```sql
+CREATE TABLE TEST.TB_SUBWAY_STATN_TK_GFF_TMP	--지하철역 승하차 임시
+(
+	SUBWAY_STATN_NO	CHAR(6) NOT NULL,	--지하철역 번호
+	STD_YM	CHAR(6) NOT NULL,	--기준년월
+	BEGIN_TIME	CHAR(6) NOT NULL,	--시작시간
+	END_TIME	CHAR(6) NOT NULL,	--종료시간
+	TK_GFF_SE_CD	VARCHAR(6) NOT NULL, 	--승하차구분코드
+	TK_GFF_CNT	NUMBER(15) NOT NULL,	--승하차 횟수
+	CONSTRAINT PK_TB_SUBWAY_STATN_TK_GFF_TMP PRIMARY KEY(SUBWAY_STATN_NO, STD_YM, BEGIN_TIME, END_TIME, TK_GFF_SE_CD)	--지하철역 번호 PK
+);
+```
+
+### ALTER 
+    컬럼 및 테이블의 제약조건을 추가/수정/제거하는 데 이용한다. 
+
+```sql
+--실습 1. 컬럼 추가하기
+ALTER TABLE TB_SUBWAY_STATN_TMP ADD (OPEN_YN CHAR(1)); --운영여부 컬럼 추가 
+
+--실습 2. 컬럼 삭제하기 
+ALTER TABLE TB_SUBWAY_STATN_TMP DROP COLUMN OPEN_YN;
+
+--실습 3. 데이터형 및 제약조건 변경
+--제약조건을 MODIFY하여 NOT NULL 조건을 추가하는 경우 이미 데이터가 있는 테이블이라면 에러가 발생한다.
+--하지만 NOVALIDATE옵션을 주면 이미 NULL값이 있어도 NOT NULL제약 조건을 주고, 이후에 들어오는 데이터에만 적용할 수 있도록 한다. 
+ALTER TABLE TB_SUBWAY_STATN_TMP ADD(OPEN_YN CHAR(1) NULL); --NULL 허용
+ALTER TABLE TB_SUBWAY_STATN_TMP MODIFY(OPEN_YN NUMBER(1) DEFAULT 0 NOT NULL NOVALIDATE);
+ALTER TABLE TB_SUBWAY_STATN_TMP RENAME OPEN_YN TO OPERATION_YN; --컬럼명 변경
+ALTER TABLE TB_SUBWAY_STATN_TK_GFF_TMP DROP FK_TB_SUBWAY_STATN_TK_GFF_TMP1; --외래키 삭제 
+
+RENAME TB_SUBWAY_STATN_TK_GFF_TMP TO TB_SUBWAY_STATN_TK_GFF_TMP_2; --테이블 이름 변경
+
+
+--실습 4. TRUNCATE
+--테이블 객체는 그대로 두고 테이블 내부의 데이터만 영구제거한다. 단, TRUNCATE로 삭제한 데이터는 ROLLBACK으로 복구가 불가능하다.
+TRUNCATE TABLE TB_SUBWAY_STATN_TK_GFF_TMP_2;
+
+--테이블 객체를 삭제하는 경우, 부모/자식 관계가 있다면, 자식 테이블을 먼저 제거한 후에 부모 테이블을 삭제해야 한다.
+```
+### 외래키를  생성하여 두 테이블의 부모/자식 관계를 설정한다. - 참조무결성 제약 조건
+```sql
+ALTER TABLE TEST.TB_SUBWAY_STATN_TK_GFF_TMP --지하철역 승하차 임시 테이블에 
+ADD CONSTRAINT FK_TB_SUBWAY_STATN_TK_GFF_TMP1 -- 참조무결성 제약 조건을 생성
+FOREIGN KEY (SUBWAY_STATN_NO)	-- 지하철역 승하차 임시 테이블의 지하철역 번호 컬럼은 
+REFERENCES TEST.TB_SUBWAY_STATN_TMP(SUBWAY_STATN_NO) - 지하철역 임시 테이블의 지하철역번호를 참조한다.
+-- 지하철역 승하차 임시 테이블에 지하철번호를 입력하는 경우에는 지하철역 임시테이블에 존재하지 데이터만 입력가능하다.
+```
