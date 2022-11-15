@@ -1,5 +1,7 @@
 # 📚 JAVA_Stack
 STUDY JAVA
+- ### 📖 Java <img src="https://img.shields.io/badge/Java-007396?style=flat-square&logo=oracle&logoColor=white"/>
+  * [JavaVirtualMachine](.docs/java/JavaVirtualMachine.md)
 
 # 📚 SPRING_Stack
 STUDY SPRING
