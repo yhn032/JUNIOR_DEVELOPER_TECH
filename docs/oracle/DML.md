@@ -47,3 +47,17 @@ COMMIT;
     여러 개의 컬럼을 출력하는 경우 합성 연산자'||'를 사용해서 연결해 출력 가능하다. 
     오라클 DB를 설치하면 기본적으로 DUAL테이블이 존재한다. 이 테이블에는 단 한건의 더미 데이터가 저장되어 있고, 컬럼 또한 하나로 'X'값이 저장되어 있다. 
     DUAL테이블을 이용하여 연산을 수행한다.
+    
+### ROWNUM 
+    특정 테이블에서 데이터가 조회될 때 출력되는 행의 순번을 의미하는 Pseudo컬럼이다. 
+    이러한 ROWNUM을 WHERE절의 조건으로 사용하여 결과 행의 건수를 제한할 수 있다.
+    
+```sql
+SELECT ROWNUM AS RNUM,
+	A.BSSH_NO ,
+	A.CMPNM_NM ,
+	NVL(A.BHF_NM, '(NULL)') AS BHF_NM,
+	A.LNM_ADRES 
+FROM SQLD.TB_BSSH A
+WHERE ROWNUM <= 10
+```
