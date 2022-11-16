@@ -352,7 +352,83 @@ String listToString2 = productList.stream()
 		.collect(Collectors.joining(",", "<", ">"));
 System.out.println(listToString2);	//<potatoes,orange,lemon,bread,sugar>
 -----------------------------------------------------------------------------------------------------
+//Collectors.averageingInt() - 숫자 값의 평균을 나타낸다. 
+Double averageAmount = productList.stream()
+		.collect(Collectors.averagingInt(Product::getAmount));
+System.out.println(averageAmount);
+-----------------------------------------------------------------------------------------------------
+//Collectors.summingInt() - 숫자 값의 합을 나타낸다.
+Integer summingAmount = productList.stream()
+		.collect(Collectors.summingInt(Product::getAmount));
+System.out.println(summingAmount);
 
+
+Integer summingAmount = productList.stream()
+		.mapToInt(Product::getAmount)
+		.sum();
+System.out.println(summingAmount);
+-----------------------------------------------------------------------------------------------------
+//Collectors.summarizingInt() -합계와 평균을 모두 구한다. 이를 사용하면 통계 작업을 위한 mapToInt를 호출할 필요가 없다.
+IntSummaryStatistics statistics = productList.stream()
+		.collect(Collectors.summarizingInt(Product::getAmount));
+System.out.println(statistics);
+//-> IntSummaryStatistics{count=5, sum=86, min=13, average=17.200000, max=23}
+개수 : statistics.getCount();
+합계 : statistics.getSum();
+평균 : statistics.getAverage();
+최소 : statistics.getMin();
+최대 : statistics.getMax();
+-----------------------------------------------------------------------------------------------------
+//Collectors.groupingBy() - 특정 조건을 기준으로 요소들을 그룹지을 수 있다. 함수형 인터페이스 Function을 인자로 받는다.
+Map<Integer, List<Product>> collectMapOfLists = productList.stream()
+		.collect(Collectors.groupingBy(Product::getAmount));
+System.out.println(collectMapOfLists);
+//같은 수량이면 리스트로 묶어서 보여준다.
+{23=[Product{amount=23, name='potatoes'}, 
+     Product{amount=23, name='bread'}], 
+ 13=[Product{amount=13, name='lemon'}, 
+     Product{amount=13, name='sugar'}], 
+ 14=[Product{amount=14, name='orange'}]}
+-----------------------------------------------------------------------------------------------------
+//Collectors.partitioningBy() - 함수형 인터페이스 predicate를 인자로 받아서 boolean값을 리턴한다.
+Map<Boolean, List<Product>> mapPartitioned = productList.stream()
+		.collect(Collectors.partitioningBy(res -> res.getAmount() > 15));
+System.out.println(mapPartitioned.toString());
+//평가하는 함수를 통해서 스트림 내 요소들을 true or false로 나눌 수 있다.
+{false=[Product{amount=14, name='orange'}, 
+        Product{amount=13, name='lemon'}, 
+        Product{amount=13, name='sugar'}], 
+ true=[Product{amount=23, name='potatoes'}, 
+       Product{amount=23, name='bread'}]}
+-----------------------------------------------------------------------------------------------------
+//Collectors.collectingAndThen() - 특정 타입으로 결과를 collect한 후에 추가 작업이 필요한 경우에 사용한다.
+public static<T,A,R,RR> Collector<T,A,RR> collectingAndThen(Collector<T,A,R> downstream, Function<R,RR> finisher) { ... }
+finisher => collect후에 실행할 작업
+
+
+//결과를 set으로 collect한 후에 수정 불간으한 set으로 변환하는 작업
+Set<Product> unmodifiableSet = productList.stream()
+		.collect(Collectors.collectingAndThen(Collectors.toSet(), Collections::unmodifiableSet));
+ -----------------------------------------------------------------------------------------------------
+//Collectors.of() - 직접 collector를 만들어서 사용한다.
+public static<T, R> Collector<T, R, R> of(Supplier<R> supplier,
+                                          BiConsumer<R, T> accumulator,
+                                          BinaryOperator<R> combiner,
+                                          Characteristics... characteristics) { ... }
+/*
+컬렉터를  생성하는 supplier에 LinkedList의 생성자를 넘겨준다. 
+accumulator에는 생성한 리스트에 추가하는 add메소드를 넘겨준다. 
+마지막으로 combiner를 이용해 생성된 리스트들을 하나의 리스트로 합친다.
+*/
+Collector<Product, ?, LinkedList<Product>> toLinkedList = Collector.of(LinkedList::new,
+		LinkedList::add, (first, second) -> {
+			first.addAll(second);
+			return first;
+		});
+
+//위에서 직접 컬렉터를 만들었기 때문에, collect메소드에 우리가 만든 커스텀 컬렉터를 넘겨줄 수 있다.
+LinkedList<Product> linkedListOfPersons = productList.stream()
+		.collect(toLinkedList);
 ```
 
 ### 4-3. Matching
@@ -382,3 +458,4 @@ codes.stream().forEach(System.out::println);
 
 # References
 https://github.com/eugenp/tutorials/tree/master/core-java-modules/core-java-streams-2
+https://futurecreator.github.io/2018/08/26/java-8-streams/
