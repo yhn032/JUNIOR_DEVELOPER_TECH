@@ -94,3 +94,116 @@ IntStream ints = new Random().ints(3);
 LongStream longs = new Random().longs(3);
 DoubleStream doubles = new Random().doubles(3);
 ```
+
+
+### 2-8. 문자열 스트림
+문자열 String을 이용해서 스트림을 생성할 수 있다. 
+```java
+//스트링의 각 문자를 IntStream으로 변환하는 예제이다.
+IntStream charStream = "Stream".chars(); //[83, 116, 114, 101, 97, 109]
+
+//정규식을 이용해 문자열을 자르고, 분리된 요소들로 스트림을 만들기 
+Stream<String> stringStream = Pattern.compile(", ").splitAsStream("Java, Is, Fun"); //[Java, Is, Fun]
+```
+
+### 2-9. 파일 스트림
+```java
+//Files클래스의 lines메소드는 해당 파일의 각 line을 String타입의 스트림으로 만들어준다.
+try {
+	Stream<String> lineStream = Files.lines(Paths.get("file.txt"), Charset.forName("UTF-8"));
+} catch (IOException e) {
+	// TODO Auto-generated catch block
+	e.printStackTrace();
+}
+```
+
+### 2-10. 병렬 스트림
+```java
+List<Product> productList = new ArrayList<>();
+		
+//병렬 스트림 생성 
+Stream<Product> parallelStream = productList.parallelStream();
+		
+//병렬 여부 확인 
+boolean isParallel = parallelStream.isParallel();
+		
+//각 작업을 스레드를 이용해 병렬 처리 
+//스트림에서 amout값을 꺼내서 10을 곱한 후 
+//결과값이 200보다 큰 값을 모두 찾는다.
+boolean isMany = parallelStream
+		.map(product -> product.getAmount()*10)
+		.anyMatch(amount -> amount > 200);
+}
+	
+class Product {
+	int amount = 0;
+		
+	public int getAmount() {
+		return this.amount;
+	}
+}
+
+//배열을 이용해서 병렬 스트림 만들기 
+Arrays.stream(arr).parallel();
+		
+//스트림 연결하기 
+Stream<String> stream1 = Stream.of("Java", "Scala", "C");
+Stream<String> stream2 = Stream.of("Python", "Go", "Swift");
+Stream<String> concat = Stream.concat(stream1, stream2);
+```
+
+# 3. 가공하기
+    전체 요소 중에서 API를 이용해 내가 원하는 것만 뽑아낼 수 있다.
+    이러한 가공 단계를 중간작업(Intermediate operations)이라고 한다. 
+    이러한 작업은 스트림을 리턴하기 때문에 여러 작업을 이어서 메서드 체이닝 방식을 사용한다.
+```java
+List<String> codes = Arrays.asList("Java", "C", "Python", "Javascript", "Go");
+```
+
+### 3-1. Filtering
+필터는 스트림 내 요소들을 하나씩 평가해서 걸러내는 작업이다. 
+인자로 받는 Predicate는 boolean을 리턴하는 함수형 인터페이스로 평가식이 들어간다.
+```java
+Stream<T> filter(Predicate<? super T> predicate);
+
+//스트림의 각 요소에 대해 평가식 (contains("a"))을 실행하게 되고, true값을 반환하는 경우만 스트림으로 구성해서 리턴한다. 
+Stream<String> stream = codes.stream()
+	.filter(c -> c.contains("a"));	//[Java, Javascript]
+```
+
+
+### 3-2. Mapping
+스트림내 요소들을 하나씩 특정 값으로 변환해준다. 
+이때 값을 변환하기 위한 람다를 인자로 받는다. 
+스트림에 들어가 있는 값이 input이 되어서 특정 로직을 거친 후 output이 되어 <b>새로운 스트림</b>에 담는 작업
+```java
+<R> Stream<R> map(Function<? super T, ? extends R> mapper);
+
+//스트림내 String의 메서드를 실행해서 대문자로 변환한 값들이 담긴 """새로운 스트림"""을 리턴한다.
+Stream<String> stream = codes.stream()
+	.map(String::toUpperCase);
+
+------------------------------------------------------------------------------------------------------------------------------
+
+//중첩구조를 한 단계 제거하고 단일 컬렉션으로 만들어주는 역할을 하는 flatMap, map메소드 자체만으로는 한 번에 할 수 없는 기능을 수행가능
+//실무 데이터처럼 중첩을 감싸져 있는 형태를 이런식으로 중첩을 제거한다.
+//인자는 mapper, 반환값은 스트림이다.
+<R> Stream<R> flatMap(Function<? super T, ? extends Stream<? extends R>> mapper);
+
+//중첩 리스트 예제 [[a], [b]]
+List<List<String>> list = Arrays.asList(Arrays.asList("a"), Arrays.asList("b"));
+
+//중첩을 제거한 후 작업 [a, b]
+List<String> flatList = list.stream()
+	.flatMap(Collection::stream)
+	.collect(Collectors.toList());
+----------------------------------------------------------------------------------------------------------------------------
+//객체로부터 뽑아내기
+//학생 객체를 가진 스트림에서 학생의 국영수 점수를 뽑아 새로운 스트림을 만들어 평균을 구한다.
+//평균값이 존재하는 경우에만 출력한다.
+student.stream()
+	.flatMapToInt(student -> IntStream.of(student.getKor(),
+						studnet.getEng(),
+						student.getMat()))
+	.average().ifPresent(avg -> System.out.println(Math.round(avg*10)/10.0));
+```
