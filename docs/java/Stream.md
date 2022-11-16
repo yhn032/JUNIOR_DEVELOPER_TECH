@@ -379,3 +379,6 @@ peek는 중간 작업이라는 점에서 차이가 있다.
 ```java
 codes.stream().forEach(System.out::println);
 ```
+
+# References
+https://github.com/eugenp/tutorials/tree/master/core-java-modules/core-java-streams-2
