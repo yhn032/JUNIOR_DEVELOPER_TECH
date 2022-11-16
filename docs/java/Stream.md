@@ -457,5 +457,5 @@ codes.stream().forEach(System.out::println);
 ```
 
 # References
-https://github.com/eugenp/tutorials/tree/master/core-java-modules/core-java-streams-2
+https://github.com/eugenp/tutorials/tree/master/core-java-modules/core-java-streams-2 <br>
 https://futurecreator.github.io/2018/08/26/java-8-streams/
