@@ -207,3 +207,175 @@ student.stream()
 						student.getMat()))
 	.average().ifPresent(avg -> System.out.println(Math.round(avg*10)/10.0));
 ```
+
+
+### 3-3 Sorting
+```java
+Stream<T> sorted();
+Stream<T> sorted(Comparator<? super T> comparator);
+
+//1. 인자없이 호출하는 경우 -> 오름차순으로 정렬
+List<Integer> list = IntStream.of(14, 11, 20, 39, 23)
+	.sorted()
+	.boxed()
+	.collect(Collectors.toList());
+System.out.println(list.toString());	//[11, 14, 20, 23, 39]
+
+//2. 인자를 넘기는 경우
+List<String> lang = Arrays.asList("Java", "Scala", "Groovy", "Python", "Go", "Swift");
+lang = lang.stream()
+	.sorted(Comparator.reverseOrder())
+	.collect(Collectors.toList());
+System.out.println(lang.toString()); //[Swift, Scala, Python, Java, Groovy, Go]
+
+//3. Comparator의 compare메소드는 두 인자를 비교해서 값을 리턴한다. 
+//문자열의 길이를 기준으로 정렬하기 - 오름차순 
+lang = lang.stream()
+	.sorted(Comparator.comparingInt(String::length))
+	.collect(Collectors.toList());
+System.out.println(lang.toString()); //[Go, Java, Swift, Scala, Python, Groovy]
+
+//문자열의 길이를 기준으로 정렬하기 - 내림차순
+lang = lang.stream()
+	.sorted((s1, s2) -> s2.length() - s1.length())
+	.collect(Collectors.toList());
+System.out.println(lang.toString()); //[Python, Groovy, Swift, Scala, Java, Go]
+```
+
+
+### 3-4. Iterating
+    스트림 내 요소들 각각을 대상으로 특정 연산을 수행하는 메서드로는 peek이 있다. 
+    특정 결과를 반환하지 않는 함수형 인터페이스 Consumer를 인자로 받는다. 
+```java
+Stream<T> peek(Consumer<? super T> action);
+
+//결과에 영향을 미치지 않는다. 대부분 작업을 처리하는 중간에 결과를 확인하고자 할때 사용한다.
+int sum = IntStream.of(1, 3, 5, 7, 9)
+	.peek(System.out::print)
+	.sum();
+//13579
+```
+
+
+# 4. 결과 만들기
+가공한 스트림을 가지고 내가 사용할 결과값으로 만들어내는 단계
+스트림을 끝내는 최종작업(terminal operations)
+
+### 4-1. Calculation
+최소, 최대, 합, 평균 등 기본형 타입으로 결과를 만들어낼 수 있다. 
+```java
+long count = IntStream.of(1, 3, 5, 7, 9).count();
+long sum = IntStream.of(1, 3, 5, 7, 9).sum();
+
+//빈스트림인 경우 count와 sum은 0을 출력하며 되지만, 
+//평균, 최대의 경우에는 표현할 수가 없기 때문에 
+//마찬가지로 java 8에 등장한 NULL처리 방법인 optional로 감싸서 리턴한다.
+OptionalInt min = IntStream.of(1, 3, 5, 7, 9).min();
+OptionalInt max = IntStream.of(1, 3, 5, 7, 9).max();
+		
+//스트림에서 바로 처리할 수도 있다. 
+DoubleStream.of(1.1, 2.2, 3.3, 4.4, 5.5)
+	.average()
+	.ifPresent(System.out::println);
+```
+
+### 4-2. Reduction
+```java
+//reduce()
+@Params
+accumulator : 각 요소를 처리하는 계산 로직. 각 요소가 올 때마다 중간 결과를 생성하는 로직 
+identity : 계산을 위한 초기값으로 스트림이 비어서 계산할 내용이 없더라도 이 값은 리턴
+combiner : 병렬 스트림에서 나눠 계산한 결과를 하나로 합치는 로직
+
+Optional<T> reduce(BinaryOperator<T> accumulator);
+T reduce(T identity, BinaryOperator<T> accumulator);
+<U> U reduce(U identity, BiFunction<U, ? super T, U> accumulator, BinaryOperator<U> combiner);
+
+/* 인자가 1개인 경우 
+BinaryOperator<T>는 같은 타입의 인자 두개를 받아 같은 타입의 결과를 반환하는 함수형 인터페이스다. 
+*/
+OptionalInt reduced = IntStream.range(1, 4)
+	.reduce((a,b) -> {
+		return Integer.sum(a, b);
+	});
+
+/* 인자가 2개인 경우 
+여기서 람다는 ★메소드 참조★를 이용해서 넘길수 있다.
+*/
+int reduce = IntStream.range(1, 4)
+	.reduce(10, Integer::sum);
+
+
+/* 인자가 3개인 경우
+세번째 인자인 combiner는 병렬 스트림에서만 실행된다.
+
+초기값 10에 각 스트림 값을 더한 세 개의 값을 각 스레드가 계산한다. 
+스레드 1 : 10 + 1 = 11
+스레드 2 : 10 + 2 = 12 
+스레드 3 : 10 + 3 = 13
+combiner호출 -> 11 + 12 = 23
+combiner호출 -> 23 + 13 = 36
+*/
+Integer reduceParallel = Arrays.asList(1, 2, 3)
+	.parallelStream()
+	.reduce(10, Integer::sum, (a,b) ->{
+		System.out.println("combiner was called");
+		return a+b;
+	});
+```
+
+### 4-3. Collecting
+```java
+//collect()
+//Collector타입의 인자를 받아서 처리한다. 자주 사용하는 작업은 Collectors객체에서 제공한다.
+-----------------------------------------------------------------------------------------------------
+//Collectors.toList() - 스트림에서 작업한 결과를 담은 리스트로 반환한다. 
+List<String> collectorCollection = productList.stream()
+		.map(Product::getName)
+		.collect(Collectors.toList());
+System.out.println(collectorCollection.toString());	//[potatoes, orange, lemon, bread, sugar]
+-----------------------------------------------------------------------------------------------------
+//Collectors.joining() - 스트림에서 작업한 결과를 하나의 스트링으로 연결한다.
+@Params
+	delimiter : 각 요소 중간에 들어가 요소를 구분시켜주는 구분자
+	prefix : 결과 맨 앞에 붙는 문자
+	suffix : 결과 맨 뒤에 붙는 문자
+
+String listToString = productList.stream()
+		.map(Product::getName)
+		.collect(Collectors.joining());
+System.out.println(listToString);	//potatoesorangelemonbreadsugar
+
+
+String listToString2 = productList.stream()
+		.map(Product::getName)
+		.collect(Collectors.joining(",", "<", ">"));
+System.out.println(listToString2);	//<potatoes,orange,lemon,bread,sugar>
+-----------------------------------------------------------------------------------------------------
+
+```
+
+### 4-3. Matching
+조건식 람다를 받아서 해당 조건을 만족하는 요소가 있는지 체크한 결과를 리턴한다. 
+```java
+boolean anyMatch(Predicate<? super T> predicate);	//하나라도 만족하는 요소가 있는지
+boolean allMatch(Predicate<? super T> predicate);	//모든 요소가 조건을 만족하는지
+boolean noneMatch(Predicate<? super T> predicate);	//모든 요소가 조건을 만족하지 않는지
+
+//결과는 모두 true
+List<String> names = Arrays.asList("Eric", "Elena", "Java");
+
+boolean anyMatch = names.stream()
+  .anyMatch(name -> name.contains("a"));
+boolean allMatch = names.stream()
+  .allMatch(name -> name.length() > 3);
+boolean noneMatch = names.stream()
+  .noneMatch(name -> name.endsWith("s"));
+```
+
+### 4-4. Iterating
+요소를 돌면서 실행되는 최종작업. 결과를 출력하는 작업
+peek는 중간 작업이라는 점에서 차이가 있다.
+```java
+codes.stream().forEach(System.out::println);
+```
