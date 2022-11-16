@@ -79,5 +79,54 @@ FROM DUAL;
     예를들어, SQL문 작성시 문자형과 숫자형을 서로 비교할 때 명시적으로 형변환을 하지 않으면 DBMS내부에서 자동으로 2개의 각기 다른 데이터형을
     동일한 데이터형으로 변환 후 연산을 처리하게 되는데, 이러한 상황을 암시적 형변환이 일어났다고 표현한다.
     * TO_NUMBER, TO_CHAR, TO_DATE, CONVERT
+```sql
+SELECT 
+	TO_CHAR(SYSDATE, 'YYYY/MM/DD'),	--[2022/11/16] : 날짜형을 문자형으로 변환
+	TO_CHAR(SYSDATE, 'YYYY/MM/DD HH24:MI:SS'),	--[2022/11/16 11:32:51] : 날짜형을 문자형으로 변환
+	TO_CHAR(10.25, '$999,999,999.99'),	--[          $10.25] : 숫자형을 문자형으로 변환
+	TO_CHAR(12500, 'L999,999,999'),	--[             ￦12,500] : 숫자형을 문자형으로 변환
+	TO_NUMBER('100') + TO_NUMBER('100'),	--[200] : 문자형을 숫자형으로 변환
+	TO_DATE(TO_CHAR(SYSDATE, 'YYYYMMDD'), 'YYYYMMDD')	--[2022-11-16 00:00:00.000] : 날짜형을 문자형으로 변환 후 다시 날짜형으로 변환
+FROM DUAL;
+```
 5. NULL 관련 함수 : NULL을 처리하기 위한 함수이다.
-    * NVL, NULLIF, COALESCE 
+    * NVL, NULLIF, COALESCE
+    * NULL과 어떠한 연산을 수행하던 결과는 NULL이기 때문에 NULL에 대한 처리가 중요하다.
+```sql
+SELECT 
+	NULLIF('SQLD', 'SQLP'),	--[SQLD] : 두 문자열이 다르면 첫 번째 문자열 출력
+	NULLIF('SQLD', 'SQLD'),	--[NULL] : 두 문자열이 같으면 NULL을 출력
+	NVL(NULLIF('SQLD', 'SQLD'), '같음'),	--[같음] : NULL인 경우 '같음'을 출력하도록
+	COALESCE(NULL, NULL, 'SQLD'),	--[SQLD] : NULL이 아닌 첫 번째 인자 출력
+	COALESCE(NULL, 'SQLP', 'SQLD'),	--[SQLP] : NULL이 아닌 첫 번째 인자 출력
+	COALESCE('SQL', 'SQLP', 'SQLD')	--[SQL] : NULL이 아닌 첫 번째 인자 출력
+FROM DUAL;
+```
+
+6. 단일행 CASE 표현의 종류
+    * 특정 값에 대해서 조건에 따라 각기 다른 값을 리턴하도록 하는 것
+    * CASE문 또는 DECODE함수를 이용한다. 
+```sql
+SELECT 
+	CASE 
+		WHEN A.INDUTY_CL_SE_CD  = 'ICS001' THEN '대' 
+		WHEN A.INDUTY_CL_SE_CD  = 'ICS002' THEN '중'
+		WHEN A.INDUTY_CL_SE_CD  = 'ICS003' THEN '소'
+		ELSE ''
+		END AS "업종분류구분명"
+FROM SQLD.TB_INDUTY_CL_SE A;
+
+
+SELECT 
+	DECODE (A.INDUTY_CL_SE_CD,
+			'ICS001',
+			'대',
+			'ICS002',
+			'중',
+			'ICS003',
+			'소',
+			''
+	) AS "업종분류코드명"
+FROM SQLD.TB_INDUTY_CL_SE A;
+```
+    
