@@ -5,6 +5,8 @@ STUDY JAVA
   * [GarbageCollection](./docs/java/GarbageCollection.md)
   * [Optional](./docs/java/Optional.md)
   * [Stream](./docs/java/Stream.md)
+  * [Lambda](./docs/java/Lambda.md)
+  * [MethodReferences](./docs/java/MethodReferences.md)
 
 # 📚 SPRING_Stack
 STUDY SPRING
@@ -17,4 +19,8 @@ Study DBMS for SQLD<br/>
   * [DCL](./docs/oracle/DCL.md)
   * [DML](./docs/oracle/DML.md)
   * [TCL](./docs/oracle/TCL.md)
+  * [단일 행 함수](./docs/oracle/Function.md)
+  * [Group By](./docs/oracle/GROUPBY.md)
+  * [PL/SQL](./docs/oracle/PLSQL.md)
 - ### 📖 Mysql <img src="https://img.shields.io/badge/Oracle-2811AB?style=flat-square&logo=oracle&logoColor=white"/>
+  * [MyBatis의 기본](./docs/mybatis/basic.md)
