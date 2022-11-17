@@ -168,7 +168,13 @@ System.out::println
     공문을 확인해보면, 컴파일시에 모든 타입의 제네릭을 계층 구조의 가장 상위 또는 계층이 없다면 Object로 대체한다
     라고 소개한다. 즉, 아무리 원시코드의 제네릭에 타입을 지정하더라도 컴파일 후에 생성되는 바이트 코드에는 
     타입이 삭제되어 기본 클래스, 인터페이스, 메서드가 포함된다는 것이다. 
-
+    
+    Type Eraser에 의해서 컴파일시에 제네릭이 삭제된다고 보는게 편할 것 같다. 
+    이는 메서드 시그니쳐에도 동일하게 적용이 된다. 메서드 시그니쳐란 메서드 명, 파라미터의 순서, 타입, 개수를 총괄하는 의미로
+    리턴 타입과 Exception은 메서드 시그니처가 아니다. 
+    아무튼 제네릭 구문이 지워진 List는 List<?>와 같은 의미가 될 것이고, 이말은 곧 List<? extends Object>를 의미한다. 
+    Object가 모든 객체의 부모 클래스라는 점을 봤을때 모든 타입이 들어올 수 있다는 의미다. 
+    이와 같은 한계로 인해 런타임 시에는 타입 증거가 어렵다는 점이 있다. 
 ### 1. 메소드 호출 시 인자의 타입 추론 
 ```java
 @SuppressWarnings("rawtypes")
@@ -323,3 +329,5 @@ calculate(subtraction, 5, calculate(addition, 3, 2));
 https://futurecreator.github.io/2018/07/19/java-lambda-basics/ <br>
 https://futurecreator.github.io/2018/07/20/java-lambda-type-inference-functional-interface/ <br>
 https://docs.oracle.com/javase/tutorial/java/IandI/defaultmethods.html <br>
+https://medium.com/asuraiv/java-type-erasure%EC%9D%98-%ED%95%A8%EC%A0%95-ba9205e120a3 <br>
+airportal.go.kr/knowledge/statsnew/air/airline.jsp <br>
