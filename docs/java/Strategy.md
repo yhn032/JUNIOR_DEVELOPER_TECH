@@ -94,17 +94,11 @@ public static void main(String[] args) {
     무역회사에서 해외 영업을 담당하고 있는 A씨는 주문관리 시스템이 필요함을 느꼈다. 
     여러 국가에서 제품에 대해 주문을 하면 해당 국가의 관세와 환율을 적용하여 가격을 
     계산해 주는 것이 필요하여 시스템 개발자에게 필요한 내용을 요구하여 아래와 같이 디자인된 시스템이 개발되었다.
+### 클래스 다이어그램
 ![image](https://user-images.githubusercontent.com/87313203/202636086-7fcd76e2-1401-44d2-821f-fca5335cf5c3.png)
     
-    Solution 
-    Is-A와 Has-A 관계
-    - 해외 영업망이 넓어지면서 영국과 프랑스가 주문을 하기 시작했다면, 이들의 관계를 다이어그램에 추가해보자 
-    - 추가된 다이어그램을 기준으로 구현하고 제대로 동작하는지 확인해보자
-    행위 및 알고리즘군 형성 
-    - 상속을 통해서 구현할 경우 나타나는 문제점을 파악하고 상속이 아닌 다른 방법으로 행위 및 알고리즘을 분리하여 구현하도록 해보자 
-    - 상속을 통한 구현과 행위 및 알고리즘을 분리해서 구현했을 때의 차이점을 비교해보자.
-
-### TaskController
+### 소스코드
+#### TaskController
 ```java
 public class TaskController {
 	public static void main(String[] args) {
@@ -143,7 +137,7 @@ public class TaskController {
 	}
 }
 ```
-### Product
+#### Product
 ```java
 public class Product {
 	private String name;
@@ -165,7 +159,7 @@ public class Product {
 }
 ```
 
-### ProductOrder
+#### ProductOrder
 ```java
 public abstract class ProductOrder {
 	private Product product;
@@ -185,7 +179,7 @@ public abstract class ProductOrder {
 
 ```
 
-### USProductOrder
+#### USProductOrder
 ```java
 public class USProductOrder extends ProductOrder{
 	private static final String ORDER_COUNTRY = "UNITED STATE";
@@ -213,7 +207,7 @@ public class USProductOrder extends ProductOrder{
 
 ```
 
-### JPProductOrder
+#### JPProductOrder
 ```java
 public class JPProductOrder extends ProductOrder{
 	
@@ -245,7 +239,7 @@ public class JPProductOrder extends ProductOrder{
 
 ```
 
-### CanProductOrder
+#### CanProductOrder
 ```java
 public class CanProductOrder extends ProductOrder{
 	
@@ -290,7 +284,15 @@ public class CanProductOrder extends ProductOrder{
 [관세] 4,500,000
 [환율 적용 가격] 14,100,000
 ```
-
+    Solution 
+    Is-A와 Has-A 관계
+    - 해외 영업망이 넓어지면서 영국과 프랑스가 주문을 하기 시작했다면, 이들의 관계를 다이어그램에 추가해보자 
+    - 추가된 다이어그램을 기준으로 구현하고 제대로 동작하는지 확인해보자
+    행위 및 알고리즘군 형성 
+    - 상속을 통해서 구현할 경우 나타나는 문제점을 파악하고 상속이 아닌 다른 방법으로 행위 및 알고리즘을 분리하여 구현하도록 해보자 
+    - 상속을 통한 구현과 행위 및 알고리즘을 분리해서 구현했을 때의 차이점을 비교해보자.
+    
+    
 ### Is-A (상속 - 밀접한 결합)
 * 상속은 다양한 알고리즘과 행위를 지원하는 방법 중 하나이다. 
 * 국가별로 서로 다른 행위를 제공하기 위해 ProductOrder 클래스를 직접 상속받아 구현
