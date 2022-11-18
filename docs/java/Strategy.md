@@ -322,7 +322,7 @@ Product Order의 가장 핵심 로직은 관세와 환율을 대입하는 것이
 
 
 ### 수정된 클래스 다이어 그램 - 기존 코드와 위의 설명, 아래의 클래스 다이어그램을 참고해서 시스템을 수정해보자.... 전체 소스코드는 아래 링크를 확인하자
-[소스코드](./src/strategy/)
+[소스코드](./src/Strategy/)
 
 ![image](https://user-images.githubusercontent.com/87313203/202643416-7da7446e-e514-4286-ae2b-15c67cbda8c1.png)
 
