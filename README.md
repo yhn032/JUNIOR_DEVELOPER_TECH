@@ -10,6 +10,7 @@ STUDY JAVA
 - ### 📖 Design Pattern 
   * [Adapter](./docs/java/Adapter.md)
   * [Strategy](./docs/java/Strategy.md)
+  * [Builder](./docs/java/Builder.md)
 
 # 📚 SPRING_Stack
 STUDY SPRING
