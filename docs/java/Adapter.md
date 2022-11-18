@@ -6,20 +6,118 @@
 * 호환성이 없는 인터페이스 때문에 함께 동작할 수 없는 클래스들이 함께 동작할 수 있도록 해준다. 
 * 클라이언트의 요구 타입과 반환 타입이 달라도, 중간에 어댑터를 둠으로써 적절히 가공하여 둘을 연결해준다.
 
-## 예시
-### 클래스 다이어그램 
+## 예시1
 1. 상속을 이용한 방법 <br>
     기존(Print), 새로운 클래스(Banner) <br>
     Banner로부터 상속받은 메서드를 사용하면서 인터페이스를 맞춰준다. 
 ![image](https://user-images.githubusercontent.com/87313203/202626853-b9eee745-5e40-4703-8f32-ca103de9ba43.png)
+![image](https://user-images.githubusercontent.com/87313203/202631346-8a915956-8624-4f89-b712-8f0dd126bab1.png)
+```java
+public interface Print {
+	public void printWeak();
+	public void printStrong();
+}	
 
+public class PrintBanner extends Banner implements Print{
+
+	public PrintBanner(String str) {
+		super(str);
+	}
+
+	@Override
+	public void printWeak() {
+		showWithParen();
+	}
+
+	@Override
+	public void printStrong() {
+		showWithAster();
+	}
+
+}
+
+public class Banner {
+	private String str;
+
+	public Banner(String str) {
+		this.str = str;
+	}
+	
+	public void showWithParen() {
+		System.out.println("(" + str + ")");
+	}
+	
+	public void showWithAster() {
+		System.out.println("*" + str + "*");
+	}
+}
+
+
+public static void main(String[] args) {
+		
+		Print print = new PrintBanner("즐거운 디자인 패턴");
+		print.printWeak();
+		print.printStrong();
+	}
+```
+
+## 예시 2
 2. 위임을 이용한 방법 <br>
     Banner 클래스의 인스턴스를 멤버로 가진다. <br>
     의존성을 주입받고, 이 인스턴스로 Banner의 메서드 사용
 ![image](https://user-images.githubusercontent.com/87313203/202626918-da4f52bf-8724-4d88-af9a-11f6a02f2e58.png)
+![image](https://user-images.githubusercontent.com/87313203/202632057-e70141ed-bc55-43d9-84fd-5476278a3ee8.png)
+
+```java
+public interface Print {
+	public void printWeak();
+	public void printStrong();
+}	
+
+public class PrintBanner implements Print{
+	
+	private Banner banner;
+	
+	public PrintBanner(String str) {
+		banner = new Banner(str);
+	}
+	
+	
+	public void printWeak() {
+		banner.showWithParen();
+	}
+
+	public void printStrong() {
+		banner.showWithAster();
+	}
+}
+
+public class Banner {
+	private String str;
+
+	public Banner(String str) {
+		this.str = str;
+	}
+	
+	public void showWithParen() {
+		System.out.println("(" + str + ")");
+	}
+	
+	public void showWithAster() {
+		System.out.println("*" + str + "*");
+	}
+}
 
 
-### 소스 코드 - 상속을 이용한 방법
+public static void main(String[] args) {
+		
+		Print print = new PrintBanner("즐거운 디자인 패턴");
+		print.printWeak();
+		print.printStrong();
+	}
+```
+
+## 예시 3
 ```java
 //기존 코드 
 public class Math {
