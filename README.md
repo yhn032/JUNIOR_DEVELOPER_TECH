@@ -8,6 +8,8 @@ STUDY JAVA
   * [Lambda](./docs/java/Lambda.md)
   * [MethodReferences](./docs/java/MethodReferences.md)
 - ### 📖 Design Pattern 
+  * [Adapter](./docs/java/Adapter.md)
+  * [Strategy](./docs/java/Strategy.md)
 
 # 📚 SPRING_Stack
 STUDY SPRING
