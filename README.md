@@ -15,7 +15,7 @@ STUDY JAVA
 # 📚 SPRING_Stack
 STUDY SPRING
 - ### 📖 HTTP <img src="https://img.shields.io/badge/HTTP-007396?style=flat-square&logo=oracle&logoColor=white"/>
-  * [Json Object VS Json Array](./docs/spring/http/Json Object VS Json Array.md)
+  * [Json Object VS Json Array](./docs/spring/Json.md)
 # 📚 SQL_Stack
 Study DBMS for SQLD<br/>
 - ### 📖 Oracle <img src="https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=mysql&logoColor=white"/>
