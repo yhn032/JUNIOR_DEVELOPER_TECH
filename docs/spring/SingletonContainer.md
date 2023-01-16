@@ -141,3 +141,94 @@ public class StatefulService {
     예시는 간단하지만, 실무에서는 복잡한 상속관계 등으로 인해 발견하기 쉽지 않고, 발생하게되면 치명적인 장애를 유발하기 때문에 
     싱글톤 객체는 반드시 무상태!!!로 유지해야 한다.
     
+    
+## @Configuration과 싱글톤
+아래의 AppConfig.java 코드를 보자 
+```java
+@Configuration
+public class AppConfig {
+    @Bean
+    public MemberService memberService(){
+        System.out.println("call AppConfig.memberService");
+        return new MemberServiceImpl(memberRepository());
+    }
+    @Bean
+    public MemberRepository memberRepository() {
+        System.out.println("call AppConfig.memberRepository");
+        return new MemoryMemberRepository();
+    }
+    @Bean
+    public OrderService orderService(){
+        System.out.println("call AppConfig.orderService");
+        return new OrderServiceImpl(memberRepository(), discountPolicy());
+    }
+    @Bean
+    public DisCountPolicy discountPolicy() {
+
+        return new RateDiscountPolicy();
+    }
+}
+```
+    memberService와 orderService를 만드는 부분을 봄녀 동일하게 memberReposiroty()를 호출하고 
+    두 번의 new를 통해 MemoryMemberRepository()를 호출한다. 
+    결과적으로 각각 달느 2개의 MemoryMemberRepository가 생성되면서 싱글톤이 깨지는 것처럼 보이니 
+    임시로 위의 예시처럼 로그를 찍어서 살펴보자 
+    예상(호출 순서는 보장X) -> 
+    call AppConfig.memberService
+    call AppConfig.memberRepository
+    call AppConfig.memberRepository
+    call AppConfig.memberRepository
+    call AppConfig.orderService
+    
+    현실 -> 
+    call AppConfig.memberService
+    call AppConfig.memberRepository
+    call AppConfig.orderService
+    
+    싱글톤이 깨지는 것처럼 보이지만 실제로는 아주 잘 유지되고 있는 것을 확인할 수 있다. 
+    어떻게 이것이 가능한 것일까?
+
+## @Configuration과 바이트코드 조작의 마법 ★★★★★★★★★★★★★
+    스프링 컨테이너는 싱글톤 레지스트리로 스프링 빈이 싱글톤이 되도록 보장해주어야 한다. 
+    하지만 스프링이 자바 코드 내부에까지 어떻게 하기는 어렵기 때문에 우리가 찍은 로그를 보면 3번 호출되어야 하는것이 맞다. 
+    -> 왜냐하면 스프링 컨테이너가 생성될 때 파라미터로 받은 설정정보 내부에 @Bean이 있는 메소드를 무조건 1번은 호출하기 때문이다. 
+    
+```java
+    @Test
+    void configurationDeep(){
+        ApplicationContext ac = new AnnotationConfigApplicationContext(AppConfig.class);
+        AppConfig bean = ac.getBean(AppConfig.class);
+
+        System.out.println("bean = " + bean.getClass());
+    }
+```
+위의 테스트를 실행해보면 우리가 평소에 알던 순수 클래스가 아니라 이상한 모양의 클래스가 조회된다.
+- 순수 : class hello.core.AppConfig
+- 조작 : class hello.core.AppConfig$$EnhancerBySpringCGLIB$$48c26325
+
+이는 내가 파라미터로 넘겨준 AppConfig가 아니라 스프링이 CGLIB이라는 바이트 코드 조작 라이브러리를 사용해서 
+AppConfig클래스를 상속받은 임의의 <b>신규 다른 클래스</b>를 만들고, 이 클래스를 스프링 빈으로 등록한 것이다. 
+이렇게 새롭게 만든 임의의 클래스가 싱글톤을 보장해준다. 
+
+아마 AppConfig@CGLIB의 로직을 예상해서 코드를 예상해보면 아래와 같지 않을까 싶다. 
+실제로는 굉장히 복잡하겠지,,,
+```java
+@Bean 
+public MemberRepository memberRepository(){
+  if(이미 컨테이너에 등록되어 있으면... ){
+    return 등록된 빈을 찾아서 반환;
+  }else {
+    기존 로직(AppConfig 내부 @Bean이 달린 메서드)을 호출해서 생성하고 스프링 컨테이너에 등록한다.
+  }
+}
+```
+
+즉, @Bean이 붙은 메서드마다 이미 스프링 빈이 존재하면 존재하는 빈을 반환하고, 없으면 생성해서 스프링 빈으로 등록하고 반환하는 코드가 
+동적으로 만들어진다.
+
+### @Configuration 없이 @Bean만 적용하면?
+    이전과 같이 스프링 컨테이너에 스프링 빈이 등록은 된다. 
+    하지만 우리가 처음 예상한 대로 3번의 호출을 거치면서 싱글톤이 보장되지 않는다. 
+    또한 CGLIB을 사용한 신규 조작 클래스가 아니라 내가 파라미터로 전달한 순수 AppConfig가 스프링 빈으로 등록된다.
+    
+    스프링 설정정보는 항상 @Configuration을 사용하여 싱글톤을 보장하도록 하자.
