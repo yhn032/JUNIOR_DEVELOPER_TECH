@@ -78,3 +78,66 @@ public class SingleTonService {
 참고로 스프링의 기본 빈 등록 방식은 싱글톤이지만, Bean의 생명주기를 조작해서 요청할 때마다 새로운 객체를 생성해서 반환하는 기능도 제공하니
 참고하자.
 
+## 싱글톤 방식의 주의점 ★
+    객체 인스턴스르 하나만 생성해서 공유하는 싱글톤 방식은 여러 클라이언트가 하나의 동일한 객체를 사용하기 때문에 
+    싱글톤 객체는 상태를 유지하지 않도록 무상태(stateless)로 설계해야 한다.
+* 특정 클라이언트에 의존적인 필드가 있으면 안 된다.
+* 특정 클라이언트가 값을 변경할 수 있는 필드가 있으면 안 된다. 
+* 가급적 읽기만 가능해야 한다. 
+* 필드 대신에 자바에서 공유되지 않는, 지역변수, 파라미터, ThreadLocal 등 사용하고 소멸되는 변수를 사용해야 한다. 
+
+### 예시 - stateful한 싱글톤 객체로 인한 문제점
+```java
+public class StatefulService {
+    private int price; //상태를 유지하는 필드
+    public void order(String name, int price){
+        System.out.println("name = " + name + " price = " + price);
+        this.price = price; //여기가 문제!
+    }
+
+    public int getPrice(){
+        return price;
+    }
+}
+
+////Test Code ======================
+    @Test
+    void statefulServiceSingleTon(){
+        AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(TestConfig.class);
+        StatefulService statefulService1 = ac.getBean(StatefulService.class);
+        StatefulService statefulService2 = ac.getBean(StatefulService.class);
+
+        //두 개의 요청이 들어왔다고 가정해보자.
+        //ThreadA : A사용자가 10000원을 주문
+        statefulService1.order("userA", 10000);
+
+        //ThreadB : B사용자가 20000원을 주문
+        statefulService1.order("userB", 20000);
+
+        //ThreadA: 사용자 A가 주문 금액을 조회 -> 10000원이 아닌 20000원이 나온다.
+        //참조값은 다르지만, 실제 사용하는 인스턴스는 동일하기 때문에 사용자 B의 요청에 덮어씌워졌다.
+        int price = statefulService1.getPrice();
+        System.out.println("price = " + price);
+
+        assertThat(statefulService1.getPrice()).isEqualTo(20000);
+    }
+
+    static class TestConfig{
+        @Bean
+        public StatefulService statefulService(){
+            return new StatefulService();
+        }
+    }
+```
+
+    위의 테스트 코드의 경우 참조값은 다르지만, 싱글톤 객체의 특성상 각 레퍼런스에는 동일한 인스턴스가 할당되기 때문에 
+    인스턴스 내부에 상태를 유지하는 price필드를 모든 사용자가 수정을 해버리면, 가장 마지막에 수정한 값만이 
+    살아남게 되는 동시성의 오류가 발생하게 된다. 
+    
+    사용자 A는 10000원의 금액으로 주문을 넣었지만, 이후에 들어온 사용자 B의 요청에 의해서 주문 금액이 20000원으로 변경된 것이다. 
+    이러한 오류를 해결하기 위해서는 아에 수정이 안되도록 하는 것이 최선이지만, 불가피하다면
+    상태를 유지하는 price변수를 order메서드 내부에서만 사용할 수 있도록 지역변수로 선언하는 방법이 있다. 
+    
+    예시는 간단하지만, 실무에서는 복잡한 상속관계 등으로 인해 발견하기 쉽지 않고, 발생하게되면 치명적인 장애를 유발하기 때문에 
+    싱글톤 객체는 반드시 무상태!!!로 유지해야 한다.
+    
