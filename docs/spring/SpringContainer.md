@@ -99,7 +99,7 @@ void findAllBeanByObjectType() {
 
 ### BeanDefinition
 * 빈 설정 메타정보
-* @Bean, ""<bean>"" 하나 당 각각 하나씩 메타정보가 생성된다. 
+* @Bean, \<bean\> 하나 당 각각 하나씩 메타정보가 생성된다. 
   각각의 형식에 맞는 Reader를 통해 설정정보를 읽고 BeanDefinition을 생성하면
   생성한 메타정보를 읽어서 스프링빈을 생성한다.
 * 스프링이 다양한 설정 형식을 지원할 수 있게 도와주는 인터페이스 
