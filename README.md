@@ -34,3 +34,5 @@ Study DBMS for SQLD<br/>
   * [PL/SQL](./docs/oracle/PLSQL.md)
 - ### 📖 Mysql <img src="https://img.shields.io/badge/Oracle-2811AB?style=flat-square&logo=oracle&logoColor=white"/>
   * [MyBatis의 기본](./docs/mybatis/basic.md)
+- ### 📖 JPA 
+  * [IntroducingJPA](./docs/jpa/IntroducingJPA.md)
