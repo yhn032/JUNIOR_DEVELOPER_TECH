@@ -48,3 +48,35 @@ ClassPathBeanDefinitionScanner라는 스캐너를 통해서 @Component를 붙여
   
 ** 이전과는 조금 다른 점이 있다면, @Bean태그를 사용하여 스프링 빈을 등록했을 때는 메서드의 이름이 빈의 이릉으로 등록되었지만 
   자동스캔을 통해 빈이 등록될때는 클래스의 이름으로 등록이 된다.(첫글자 대문자만 소문자로 변경되어 빈 이름이 지정된다.)
+  
+  
+## 탐색 위치와 기본 스캔 대상
+- 모든 자바 클래스를 전부 스캔하면 시간이 오래 걸리므로, 꼭 필요한 위치부터 시작할 수 있도록 아래와 같이 스캔 위치를 지정할 수 있다.  
+```java
+  @ComponentScan(
+        basePackages = "hello.core",
+        basePackageClasses = AutoAppConfig.class,
+        excludeFilters = @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = Configuration.class)
+ )
+```
+- basePakages는 해당 패키지를 스캔 시작 위치로 잡는다. 
+- basePaageClasses는 해당 클래스가 포함된 패키지를 스캔 시작 위치로 잡는다. 
+- ★ 시작 위치를 잡지 않은 경우 @ComponentScan이 붙어있는 설정 정보의 패키지로 디폴트가 지정된다.
+    - 관례상 패키지를 지정하지 않고, 설정 정보의 클래스 위치를 프로젝트 폴더 구조 상 최상단에 두는 것이 좋다.
+  
+## 컴포넌트 스캔 기본 대상 
+1. @Component : 컴포넌트 스캔에 사용
+2. @Controller : 스프링 MVC 컨트롤러에서 사용
+3. @Service : 스프링 비즈니스 로직에서 사용
+4. @Repository : 스프링 데이터 접근 계층에서 사용
+5. @Configuration : 스프링 설정 정보에서 사용
+
+컴포넌트 스캔의 용도 뿐만 아니라 아래의 애노테이션이 있으면 스프링이 부가 기능을 수행한다. 
+1. @Controller : 스프링 MVC 컨트롤러로 인식
+2. @Service : 실제로 특별한 처리를 하지는 않지만, 개발자들이 핵심 비즈니스 로직이 여기에 있겠구나 라고 비즈니스 계층을 인식하는데 도움이 된다.
+3. @Repository : 스프링 데이터 접근 계층으로 인식하고, 데이터 계층의 예외를 스프링 예외로 변환해준다. 
+4. @Configuration : 스프링 설정 정보로 인식하고, 스프링 빈이 싱글톤을 유지하도록 추가 처리를 한다.(CGLIB)
+  
+### 참고 
+  * 스프링 부트를 사용하면 스프링 부트의 대표 시작 정보인 @SpringBootApplication안에 @ComponentScan이 들어있다.
+  * useDefaultFilters라는 옵션은 기본적으로 켜져 있는데, 이 옵션을 끄게 되면 위에서 소개한 기본 스캔 대상들이 제외된다.
