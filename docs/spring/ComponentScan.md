@@ -92,3 +92,38 @@ ClassPathBeanDefinitionScanner라는 스캐너를 통해서 @Component를 붙여
 3. ASPECTJ : AspectJ 패턴 사용 (ex> org.example..*Service+)
 4. REGEX : 정규 표현식 (ex> org\.example\.Default.*)
 5. CUSTOM : TypeFilter라는 인터페이스를 구현해서 처리한다. (ex> org.example.MyTypeFilter)
+  
+  
+  
+## 중복 등록과 충돌
+1. 자동 빈 등록 VS 자동 빈 등록<br>
+  일부러 빈의 이름을 동일하게 해서 에러를 내보면 아래와 같은 예외가 발생한다. 
+```xml
+org.springframework.context.annotation.ConflictingBeanDefinitionException: Annotation-specified bean name 'service' for bean class [hello.core.order.OrderServiceImpl] conflicts with existing, non-compatible bean definition of same name and class [hello.core.member.MemberServiceImpl]
+```
+  
+2. 수동 빈 등록 VS 자동 빈 등록<br>
+  같은 방식으로 AutoAppConfig에 같은 이름을 가지도록 Bean을 수동으로 추가하면 아래아 같이 오버라이딩 되었다는 로그를 볼 수 있다.
+```xml
+Overriding bean definition for bean 'memoryMemberRepository' with a different definition: replacing [Generic bean: class [hello.core.member.MemoryMemberRepository]; scope=singleton; abstract=false; lazyInit=null; autowireMode=0; dependencyCheck=0; autowireCandidate=true; primary=false; factoryBeanName=null; factoryMethodName=null; initMethodName=null; destroyMethodName=null; defined in file [C:\Users\qqwee2\OneDrive\김병국\인프런\스프링 핵심 원리 기본편\SpringStudy\core\out\production\classes\hello\core\member\MemoryMemberRepository.class]] with [Root bean: class [null]; scope=; abstract=false; lazyInit=null; autowireMode=3; dependencyCheck=0; autowireCandidate=true; primary=false; factoryBeanName=autoAppConfig; factoryMethodName=memberRepository; initMethodName=null; destroyMethodName=(inferred); defined in hello.core.AutoAppConfig]
+```
+    결론적으로 수동 빈과 자동 빈이 충돌하는 경우 수동 빈이 우선 순위를 갖게 되고, 수동 빈이 자동 빈의 내용을 오버라이딩 하게 된다.
+    하지만 대부분의 오류는 개발자가 오버라이딩을 의도하기 보다는 복잡한 여러 설정들이 꼬여서 충돌이 발생하는 경우가 많은데 
+    이렇게 애매한 오류는 발견이 어렵다. 따라서 조금 코드가 길어지더라도 필요 이상의 무리한 추상화보다 명확하게 개발하는 것이 더 좋다.
+  
+    위의 방식은 AutoAppConfig에 대한 테스트 코드를 실행한 경우 발생하는 로그이다. 이러한 오버라이딩이 스프링 자체에서는 기본값이지만, 
+    최근 스프링 부트는 실행하는 시점에 그냥 에러를 내서 빨리 수정하도록 기본값을 바꾸었다.  
+  
+    참고로 application.properties 파일 내부에 
+    spring.main.allow-bean-definition-overriding=true로 설정하면(default = false) 오버라이딩이 되도록 수정할 수 있다.
+
+```xml
+  Description:
+
+The bean 'memoryMemberRepository', defined in class path resource [hello/core/AutoAppConfig.class], could not be registered. A bean with that name has already been defined in file [C:\Users\qqwee2\OneDrive\김병국\인프런\스프링 핵심 원리 기본편\SpringStudy\core\out\production\classes\hello\core\member\MemoryMemberRepository.class] and overriding is disabled.
+
+Action:
+
+Consider renaming one of the beans or enabling overriding by setting spring.main.allow-bean-definition-overriding=true
+```
+    
