@@ -80,3 +80,15 @@ ClassPathBeanDefinitionScanner라는 스캐너를 통해서 @Component를 붙여
 ### 참고 
   * 스프링 부트를 사용하면 스프링 부트의 대표 시작 정보인 @SpringBootApplication안에 @ComponentScan이 들어있다.
   * useDefaultFilters라는 옵션은 기본적으로 켜져 있는데, 이 옵션을 끄게 되면 위에서 소개한 기본 스캔 대상들이 제외된다.
+
+
+## 필터
+- includeFilters : 컴포넌트 스캔 대상을 추가로 지정한다. 
+- excludeFilters : 컴포넌트 스캔에서 제외할 대상을 지정한다.
+  
+### FilterType의 옵션 
+1. ANNOTATION : 기본값으로 애노테이션을 인식해서 동작한다. (ex> org.example.SomeAnnotation)
+2. ASSIGNABLE_TYPE : 지정한 타입과 자식 타입을 인식해서 동작한다. (ex> org.example.SomeClass)
+3. ASPECTJ : AspectJ 패턴 사용 (ex> org.example..*Service+)
+4. REGEX : 정규 표현식 (ex> org\.example\.Default.*)
+5. CUSTOM : TypeFilter라는 인터페이스를 구현해서 처리한다. (ex> org.example.MyTypeFilter)
