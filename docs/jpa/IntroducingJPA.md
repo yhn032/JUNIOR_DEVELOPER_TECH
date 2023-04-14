@@ -112,4 +112,32 @@ SELECT I.*, A.*
 * 테이블은 외래키를 가지고 다른 테이블과 연관관계를 가지고 조인을 사용해서 연관된 테이블을 조회한다.
 
 ![image](https://user-images.githubusercontent.com/87313203/231955456-d8503a13-40d2-4fee-af90-d617f2dabc5c.png)
+- 위 그림에 따르면 Member 객체는 Member.team 필드에 Team 객체의 참조를 보관해서 Team 객체와 연관관계를 맺는다.
+    - member.getTeam()
+- MEMBER 테이블은 MEMBER.TEAM_ID 값을 외래키로 사용하여 TEAM 테이블과 연관관계를 맺는다. 
+    - select M.*, T.*
+    - from Member M
+    - join Team T on M.TEAM_ID = T.TEAM_ID
+- 위 두 방법에서 알아볼 수 있는 차이점이라면 객체는 참조가 있는 방향으로만 조회가 가능하지만 테이블은 연관관계가 있다면 양방향으로 조회가 가능하다.
+    - team.getMember() : X, TEAM JOIN MEMBER or MEMBER JOIN TEAM : O
 
+- 추가적으로 객체를 테이블에 맞추어 모델링하여 두드러지는 차이점을 비교해보자 
+```java
+    class Member {
+        String id;                  //MEMBER_ID
+        Long teamId;                //TEAM 객체의 참조가 아닌, TEAM_ID 즉, FK를 저장
+        String username;
+    }
+    
+    class Team {
+        Long id;
+        String name;
+    }
+```
+- 이렇게 객체를 테이블에 맞추어 모델링하게 되면 객체를 테이블에 저장하거나 조회할 때는 아주 편리하다. 
+- 테이블에서는 조인이라는 기능이 있기 때문에 외래키 값이 있다면 조회가 가능하지만 자바에서는 객체를 조회할 때 테이블과 달리 참조를 사용해야 한다. 
+- 따라서 member.getTeam()의 기능을 사용할 수 없다. 이런 방식의 모델링은 기존의 객체지향 방식을 오히려 저하시키는 방식이 된다. 
+- 하지만 반대로 Member 클래스 내부에 Team 객체를 저장하여도, member.getTeam()로 연관 객체를 조회할 수는 있지만 
+- 객체를 테이블에 저장하거나 조회할 때가 아주 불편하다. 
+- 결론적으로 연관관계에 대해서 객체는 참조값을, 테이블은 외래키를 사용하는 패러다임의 불일치로 인해 개발자가 중간에서 변환하는 작업을 거쳐야 한다. 
+- 이와 같은 패러다임 불일치로 발생하는 불필요한 중간단계 작업을 하지 않기 위해서 JPA를 사용한다.
