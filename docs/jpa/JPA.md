@@ -63,3 +63,12 @@
 * 매 순간 DB를 조회하는 것이 아니기 때문에 조회 성능상 이점이 있다. 
 
 ### 동일성 보장
+* 동일성 (identity) : 실제 인스턴스가 같다. 따라서 참조 값을 비교하는 == 비교의 값이 같다.
+* 동등성 (equality) : 실제 인스턴스는 다를 수 있지만, 인스턴스가 가지고 있는 값이 같다. 자바에서 동등성 비교는 equals()메서드를 구현한다. 
+
+``` java
+    Member a = em.find(Member.class, "member1");
+    Member b = em.find(Member.class, "member1");
+    
+    System.out.print(a == b) //동일성 비교 -> True
+```
