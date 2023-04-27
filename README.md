@@ -36,3 +36,4 @@ Study DBMS for SQLD<br/>
   * [MyBatis의 기본](./docs/mybatis/basic.md)
 - ### 📖 JPA 
   * [IntroducingJPA](./docs/jpa/IntroducingJPA.md)
+  * [JPA](./docs/jpa/JPA.md)
