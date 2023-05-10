@@ -51,6 +51,24 @@
 * 대리키 사용 방식 -> 데이터베이스마다 지원하는 방식이 달라 여러가지 존재. (Ex. Oracle : Sequence, MySql : Auto-Increment)
   * @Id @GeneratedValue에 아래 옵션을 적용하여 사용 가능 
 * IDENTITY : 기본 키 생성을 데이터베이스에 위임한다.
+```sql
+CREATE TABLE BOARD (
+  ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
+  DATA VARCHAR(255)
+)
+
+INSERT INTO BOARD(DATA) VALUES('A');
+INSERT INTO BOARD(DATA) VALUES('B');
+```
+```java
+@Entity
+public class Board {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    //...
+}
+```
   * MySQL, PostgreSQL, SQL Server, DB2에서 주로 사용한다. 
   * 직접 할당과는 다르게 엔티티를 저장할 때, 기본 키값을 할당하지 않아도 DB가 자동으로 생성해서 할당한다. 
   * 주의점
@@ -59,4 +77,68 @@
     * 커밋이 아닌 em.persist가 실행되는 즉시 insertSQL이 DB에 전달된다.
     * 즉, 이 전략에서는 쓰기지연을 지원하지 않는다. 
 * SEQUENCE : 데이터베이스 시퀀스를 사용해서 기본키 할당
+```sql
+CREATE TABLE BOARD (
+  ID BIGINT NOT NULL PRIMARY KEY, 
+  DATA VARCHAR(255)
+)
+CREATE SEQUENCE BOARD_SEQ START WITH 1 INCREMENT BY 1;
+```
+```java
+@Entity
+@SequenceGenerator(
+        name = "BOARD_SEQ_GENERATOR",
+        sequenceName = "BOARD_SEQ", //매핑할 DB 시퀀스 이름
+        initialValue = 1, allocationSize = 1
+)
+public class Board {
+    @Id @GeneratedValue(strategy = GenerationType.SEQUENCE,
+                        generator = "BOARD_SEQ_GENERATOR"
+    )
+    private Long id;
+
+    //...
+}
+```
+  * 오라클, PostgreSQL, DB2, H2 DB에서 주로 사용한다.  
+  * ID 식별자 값은 BOARD_SEQ_GENERATOR 시퀀스 생성기가 할당한다.
+  * 시퀀스 전략은 em.persist()를 호출할 때 먼저 데이터베이스 시퀀스를 사용해서 식별자를 조회한 후에 엔티티를 영속성 컨텍스트에 저장한다. 
+  * 이와 달리 IDENTITY 전략은 엔티티를 먼저 저장한 후에 식별자를 조회해서 엔티티의 식별자에 할당한다.
+
+@SequenceGenerator 속성 정리
+|속성|기능|기본값|
+|---|---|---|
+|name|식별자 생성기 이름|필수|
+|sequenceName|데이터베이스에 등록되어 있는 시퀀스 이름|hibernate_sequence|
+|initialValue|DDL 생성시에만 사용. 시퀀스 DDL을 처음 생성할 때 처음 시작하는 수를 지정|1|
+|allocationSize|시퀀스 한 번 호출에 증가하는 수(성능 최적화에 사용한다)|50| 
+|catalog, schema|데이터베이스 catalog, schema 이름||
+
 * TABLE : 키 생성 테이블 사용
+  * 키 생성 전용 테이블을 하나 만들고 여기에 이름과 값으로 사용할 컬럼을 만들어 데이터베이스 시퀀스를 흉내내는 전략이다.
+  * 모든 데이터베이스에 적용이 가능하다. 
+```sql
+CREATE TABLE MY_SEQUENCES (
+  sequence_name varchar(255) not null, --시퀀스 이름
+  next_val bigint,                     --시퀀스 
+  primary key(sequence_name)
+)
+```
+
+```java 
+@Entity
+@TableGenerator(
+        name = "BOARD_SEQ_GENERATOR",
+        table = "MY_SEQUENCES",
+        pkColumnValue = "BOARD_SEQ",
+        allocationSize = 1
+)
+public class Board {
+    @Id @GeneratedValue(strategy = GenerationType.TABLE,
+                        generator = "BOARD_SEQ_GENERATOR"
+    )
+    private Long id;
+
+    //...
+}
+```
