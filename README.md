@@ -37,3 +37,4 @@ Study DBMS for SQLD<br/>
 - ### 📖 JPA 
   * [IntroducingJPA](./docs/jpa/IntroducingJPA.md)
   * [JPA](./docs/jpa/JPA.md)
+  * [EntityMapping](./docs/jpa/EntityMapping.md)
