@@ -38,3 +38,5 @@ Study DBMS for SQLD<br/>
   * [IntroducingJPA](./docs/jpa/IntroducingJPA.md)
   * [JPA](./docs/jpa/JPA.md)
   * [EntityMapping](./docs/jpa/EntityMapping.md)
+  * [FieldMapping](./docs/jpa/FieldMapping.md)
+  * [QueryDslBulk](./docs/jpa/QueryDslBulk.md)
